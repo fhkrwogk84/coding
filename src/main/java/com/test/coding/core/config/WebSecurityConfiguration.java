@@ -58,9 +58,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
             // 권한처리 설정
             .authorizeRequests()
-                /*.antMatchers("/login", "/swagger-ui.html").permitAll()
-                .anyRequest().authenticated()*/
-                .anyRequest().permitAll()
+                .antMatchers("/login").permitAll()
+                .anyRequest().authenticated()
                 .and()
             // 로그인 설정
             .formLogin()
