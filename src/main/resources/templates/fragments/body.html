@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+    <body layout:fragment="bodyFragment">
+        <div>
+            <th:block layout:include="fragments/nav :: navFragment"></th:block>
+
+            <section>
+                <div class="container">
+                    <!-- Content Area -->
+                    <th:block layout:fragment="content_body"></th:block>
+                    <!-- // Content Area -->
+                </div>
+            </section>
+        </div>
+        <script src="//code.jquery.com/jquery-3.4.1.min.js"></script>
+        <script th:inline="javascript" th:src="@{/webjars/bootstrap/4.3.1/js/bootstrap.min.js}"></script>
+        <script th:inline="javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=701a4f1ed32f0a2561ea78796e1e47b2"></script>
+        <th:block layout:fragment="script"></th:block>
+    </body>
+</html>

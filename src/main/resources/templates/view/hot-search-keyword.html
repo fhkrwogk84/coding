@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout/layout">
+
+    <th:block layout:fragment="content_body">
+
+        <div class="page-header my-lg-4">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h1 id="buttons">인기 키워드 목록</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="bs-component">
+            <div class="alert alert-dismissible alert-warning">
+                <h4 class="alert-heading">캐시 기능 사용 중 (20초)</h4>
+                <p class="mb-0">캐시 즉시 삭제를 원하시면 <button type="button" class="btn btn-outline-success btn-sm" id="removeCacheBtn">캐시 삭제</button> 를 눌러주세요</p>
+            </div>
+        </div>
+        <table class="table">
+            <tr class="table-primary">
+                <th style="width: 100px">순위</th>
+                <th>키워드</th>
+                <th style="width: 200px">검색횟수</th>
+            </tr>
+            <tr th:each="item, index : ${result}">
+                <td th:text="${index.index+1}">키워드</td>
+                <td th:text="${item.searchKeyword}">키워드</td>
+                <td th:text="${item.cnt}">검색횟수</td>
+            </tr>
+        </table>
+
+    </th:block>
+
+    <!-- 사용자 스크립트 추가 -->
+    <th:block layout:fragment="script">
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+
+            // 캐시 삭제 버튼 클릭 시 - 캐시 삭제
+            document.getElementById('removeCacheBtn').onclick = function() {
+
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', '/api/my-search-history/command/remove-cache');
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+                xhr.onreadystatechange = function () {
+
+                    // readyState 4: 완료
+                    if(xhr.readyState !== 4)
+                        return;
+
+                    // status 200: 성공
+                    if(xhr.status !== 200) {
+                        console.log(xhr.responseText);
+                    } else {
+                        console.log('에러: ' + xhr.status);
+                    }
+                };
+                xhr.send();
+            }
+
+            /*]]>*/
+        </script>
+    </th:block>
+
+</html>

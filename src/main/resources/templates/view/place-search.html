@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout/layout">
+
+    <th:block layout:fragment="content_body">
+
+        <div class="page-header my-lg-4">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h1 id="buttons">장소 검색</h1>
+                </div>
+            </div>
+        </div>
+
+        <!-- 검색 영역 -->
+        <form class="form-inline mymy-2 my-lg-3" id="frm" action="/view/place-search">
+            <div class="mr-auto"></div>
+            <input class="form-control mr-sm-2" type="text" name="searchKeyword" id="searchKeyword" placeholder="검색어를 입력하세요" th:value='${searchKeyword}' />
+            <input type="hidden" id="page" name ="page"/>
+            <button class="btn btn-outline-primary my-2 my-sm-0" type="button"id="searchBtn">검색</button>
+        </form>
+        <!-- 검색 영역 -->
+
+        <!-- 검색 결과 영역 -->
+        <div>
+            <!-- 리스트 영역-->
+            <table class="table table-hover"id="table">
+                <tr class="table-primary">
+                    <th>상호명</th>
+                    <th style="width: 300px">카테고리</th>
+                    <th style="width: 300px">주소</th>
+                </tr>
+                <tr th:each="item, index : ${result.list}" th:data-index="${index.index}">
+                    <td th:text="${item.placeName}">상호명</td>
+                    <td th:text="${item.categoryName}">카테고리</td>
+                    <td th:text="${item.addressName}">주소</td>
+                </tr>
+            </table>
+            <!-- 리스트 영역-->
+
+            <!-- 페이징 영역 -->
+            <div th:if="${result.totalCount > 0}" id="pagination">
+                <div th:if="${result.prev} == true" style="display:inline;float:left;">
+                    <button class="btn btn-outline-primary" type="button" th:data-page="${result.startPage}-1">&laquo;</button>
+                </div>
+                <div th:each="idx : ${#numbers.sequence(result.startPage,result.endPage)}" style="display:inline;float:left;">
+                    <button class="btn btn-outline-primary" th:classappend="${result.page.pageNumber} == ${idx} ? active : null" type="button" th:data-page="${idx}" th:text="${idx}"></button>
+                </div>
+                <div th:if="${result.next} == true and ${result.endPage > 0}" style="display:inline;">
+                    <button class="btn btn-outline-primary" type="button" th:data-page="${result.endPage}+1">&raquo;</button>
+                </div>
+            </div>
+            <!-- 페이징 영역 -->
+        </div>
+        <!-- 검색 결과 영역 -->
+
+        <!-- /.box-body -->
+    </th:block>
+
+    <!-- 사용자 스크립트 추가 -->
+    <th:block layout:fragment="script">
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+
+            // 검색 결과 리스트 - 상세화면 이동을 위해 저장
+            const result = [[${result.list}]];
+
+            // 검색된 키워드 - 1차 검색 이후 페이지 이동시, 검색어에 입력된 값이 아닌, 기존에 입력된 값으로 검색하기 위해 저장
+            const searchedKeyword = [[${searchKeyword}]];
+
+            // 검색 버튼 클릭 시 - 장소 검색
+            $('#searchBtn').click(() =>{
+                const searchKeyword = $('#searchKeyword').val()
+                if(searchKeyword != null && searchKeyword != '' && searchKeyword.trim() != ''){
+                    $('#frm').submit();
+                }
+                return false;
+            });
+
+            // 리스트 클릭 시 - 상세 화면으로 이동
+            $('#table tr').click(function() {
+
+                // 클릭된 장소의 상세 정보를 sessionStorage에 저장 (id로 상세 정보를 조회하는 API를 못찾음)
+                const index = $(this).data('index');
+                sessionStorage.setItem('placeInfo', JSON.stringify(result[index]));
+                location.href = '/view/place-search/detail'
+                return false;
+            });
+
+            // 페이지네이션 클릭 시 - 페이징 검색
+            $('#pagination button').click(function() {
+
+                // 현재 선택된 페이지의 경우, 재검색을 하지 않는다.
+                if($(this).attr('class').indexOf('active') > 0){
+                    return;
+                }
+
+                $('#searchKeyword').val(searchedKeyword);
+                $('#page').val($(this).data('page'));
+                $('#frm').submit();
+                return false;
+            });
+
+            /*]]>*/
+        </script>
+    </th:block>
+</html>

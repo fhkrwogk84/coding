@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout/layout">
+
+    <th:block layout:fragment="content_body">
+
+        <div class="page-header my-lg-4">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h1 id="buttons">장소 상세</h1>
+                </div>
+            </div>
+        </div>
+
+        <table class="table">
+            <tr>
+                <th style="width: 200px">상호명</th>
+                <td id="placeName"></td>
+            </tr>
+            <tr>
+                <th>카테고리</th>
+                <td id="categoryName"></td>
+            </tr>
+            <tr>
+                <th>전화번호</th>
+                <td id="phone"></td>
+            </tr>
+            <tr>
+                <th>지번 주소</th>
+                <td id="addressName"></td>
+            </tr>
+            <tr>
+                <th>도로명 주소</th>
+                <td id="roadAddressName"></td>
+            </tr>
+            <tr>
+                <th>지도 바로가기</th>
+                <td><button type="button" class="btn btn-outline-primary" id="goMapBtn">새창열기</button></td>
+            </tr>
+            <tr>
+                <th>Map</th>
+                <td><div id="map" style="width:500px;height:400px;"></div></td>
+            </tr>
+        </table>
+
+        <button type="button" class="btn btn-outline-primary btn-lg float-right" id="goBackBtn">뒤로가기</button>
+        <!-- /.box-body -->
+    </th:block>
+
+    <!-- 사용자 스크립트 추가 -->
+    <th:block layout:fragment="script">
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+
+            // 뒤로가기 버튼 클릭 시 - 히스토리 백
+            document.getElementById('goBackBtn').onclick = function() {
+                window.history.back();
+            };
+
+            // 지도바로가기 - 새창열기 클릭 시, - 새창에 지도 표시
+            document.getElementById('goMapBtn').onclick = function() {
+                window.open("https://map.kakao.com/link/map/"+placeInfo.id, "_blank");
+            };
+
+            // 페이지 로딩 시
+            var onloadCallback = function(){
+
+                // 리스트에서 클릭 시 저정된 장소 정보를 꺼내와서 화면에 노출한다.
+                var placeInfo = JSON.parse(sessionStorage.getItem("placeInfo"));
+                $("#placeName").text(placeInfo.place_name);
+                $("#categoryName").text(placeInfo.category_name);
+                $("#phone").text(placeInfo.phone);
+                $("#addressName").text(placeInfo.address_name);
+                $("#roadAddressName").text(placeInfo.road_address_name);
+
+                // Map 설정
+                // 1. 맵 노출
+                var container = document.getElementById('map'); //지도를 담을 영역의 DOM 레퍼런스
+                var options = { //지도를 생성할 때 필요한 기본 옵션
+                    center: new kakao.maps.LatLng(placeInfo.y, placeInfo.x), //지도의 중심좌표.
+                    level: 3 //지도의 레벨(확대, 축소 정도)
+                };
+                var map = new kakao.maps.Map(container, options);
+
+                // 2. 마커 노출
+                var markerPosition  = new kakao.maps.LatLng(placeInfo.y, placeInfo.x);
+                var marker = new kakao.maps.Marker({
+                    position: markerPosition
+                });
+                marker.setMap(map);
+
+                // 3. 커스텀 오버레이 노출
+                var content = '<div style ="border:solid 1px black; color:red"><span >장소명 : '+placeInfo.place_name+'<br>주소 : '+placeInfo.address_name+'</span></div>';
+                var position = new kakao.maps.LatLng(placeInfo.y, placeInfo.x);
+                var customOverlay = new kakao.maps.CustomOverlay({
+                    position: position,
+                    content: content
+                });
+                customOverlay.setMap(map);
+
+                return false;
+            };
+
+            if (document.readyState === "complete" ||(document.readyState !== "loading" && !document.documentElement.doScroll)) {
+                onloadCallback();
+            }else{
+                document.addEventListener("DOMContentLoaded", onloadCallback);
+            }
+
+            /*]]>*/
+        </script>
+    </th:block>
+</html>
